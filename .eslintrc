@@ -1,0 +1,1 @@
+{ "extends": ["wesbos"], "rules": { "no-unused-vars": 1 },"ignorePatterns": ["package-lock.json", "node_modules/*"] }
