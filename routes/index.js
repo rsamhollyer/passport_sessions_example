@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
-const { genPassword } = require('../lib/passwordUtils');
+const { genPassword, validPassword } = require('../lib/passwordUtils');
 const connection = require('../config/database');
 
 const { User } = connection.models;
@@ -10,13 +10,20 @@ const { User } = connection.models;
  */
 
 // TODO
-router.post('/login', passport.authenticate('local'), (req, res, next) => {});
+router.post(
+  '/login',
+  passport.authenticate('local', {
+    failureRedirect: '/login-failure',
+    successRedirect: 'login-success',
+  })
+);
 
 // TODO
 router.post('/register', (req, res, next) => {
   const saltHash = genPassword(req.body.pw);
   const { salt, hash } = saltHash;
   const newUser = new User({ username: req.body.uname, hash, salt });
+
   newUser.save().then(user => console.log(user));
   res.redirect('/login');
 });
@@ -32,8 +39,8 @@ router.get('/', (req, res, next) => {
 // When you visit http://localhost:3000/login, you will see "Login Page"
 router.get('/login', (req, res, next) => {
   const form = `<h1>Login Page</h1><form method="POST" action="/login">
-    Enter Username:<br><input type="text" name="username">
-    <br>Enter Password:<br><input type="password" name="password">
+    Enter Username:<br><input type="text" name="uname">
+    <br>Enter Password:<br><input type="password" name="pw">
     <br><br><input type="submit" value="Submit"></form>`;
 
   res.send(form);
@@ -42,8 +49,8 @@ router.get('/login', (req, res, next) => {
 // When you visit http://localhost:3000/register, you will see "Register Page"
 router.get('/register', (req, res, next) => {
   const form = `<h1>Register Page</h1><form method="post" action="register">
-                    Enter Username:<br><input type="text" name="username">
-                    <br>Enter Password:<br><input type="password" name="password">
+                    Enter Username:<br><input type="text" name="uname">
+                    <br>Enter Password:<br><input type="password" name="pw">
                     <br><br><input type="submit" value="Submit"></form>`;
 
   res.send(form);

@@ -10,24 +10,24 @@ const customFields = {
   passwordField: 'pw',
 };
 const verifyCallback = (username, password, done) => {
-  User.findOne({ username }, function (err, user) {
-    if (err) {
-      return done(err);
-    }
-    if (!user) {
-      return done(null, false, { message: 'Incorrect username.' });
-    }
-    if (!user.validPassword(password)) {
-      return done(null, false, { message: 'Incorrect password.' });
-    }
-    const isValid = validPassword(password, user.hash, user.salt);
+  User.findOne({ username })
+    .then(user => {
+      if (!user) {
+        return done(null, false);
+      }
 
-    if (isValid) {
-      return done(null, user);
-    }
-    return done(null, false);
-  });
+      const isValid = validPassword(password, user.hash, user.salt);
+
+      if (isValid) {
+        return done(null, user);
+      }
+      return done(null, false);
+    })
+    .catch(err => {
+      done(err);
+    });
 };
+
 const strategy = new LocalStrategy(customFields, verifyCallback);
 
 passport.use(strategy);
